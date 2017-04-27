@@ -1119,7 +1119,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                                                   si.service_exists_,
                                                   connection_key);
     security_manager::SSLContext* ssl_context =
-        GetSSLContextBySession(session_info);
+        security_manager_->CreateSSLContext(connection_key);
 
     if (!ssl_context || security_manager_->IsCertificateUpdateRequired()) {
       const std::string error("CreateSSLContext failed");
@@ -1231,7 +1231,35 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     }
     // Certificate is existing and doesn't rquire update,
     // try to start encrypted service
-    StartEncryptedService(session_info);
+    if (ssl_context->IsInitCompleted()) {
+      // mark service as protected
+      session_observer_.SetProtectionFlag(connection_key, service_type);
+      // Start service as protected with current SSLContext
+      SendStartSessionAck(connection_id,
+                          session_id,
+                          packet.protocol_version(),
+                          si.hash_id_,
+                          packet.service_type(),
+                          PROTECTION_ON);
+    } else {
+      security_manager_->AddListener(
+          new StartSessionHandler(connection_key,
+                                  this,
+                                  session_observer_,
+                                  connection_id,
+                                  session_id,
+                                  packet.protocol_version(),
+                                  si.hash_id_,
+                                  service_type,
+                                  get_settings().force_protected_service()));
+      if (!ssl_context->IsHandshakePending()) {
+        // Start handshake process
+        security_manager_->StartHandshake(connection_key);
+      }
+    }
+    LOG4CXX_DEBUG(logger_,
+                  "Protection establishing for connection "
+                      << connection_key << " is in progress");
     return RESULT_OK;
   }
 #endif  // ENABLE_SECURITY
