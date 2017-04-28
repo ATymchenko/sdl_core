@@ -1121,7 +1121,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     security_manager::SSLContext* ssl_context =
         security_manager_->CreateSSLContext(connection_key);
 
-    if (!ssl_context || security_manager_->IsCertificateUpdateRequired()) {
+    if (ssl_context && security_manager_->IsCertificateUpdateRequired()) {
       const std::string error("CreateSSLContext failed");
       LOG4CXX_ERROR(logger_, error);
       security_manager_->SendInternalError(
