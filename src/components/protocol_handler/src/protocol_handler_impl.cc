@@ -1028,7 +1028,12 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
             connection_id_, session_id_, protocol_version_, service_type_);
       } else {
         // Could not be success handshake and not already protected service
-        NOTREACHED();
+        protocol_handler_->SendStartSessionAck(connection_id_,
+                                               session_id_,
+                                               protocol_version_,
+                                               hash_id_,
+                                               service_type_,
+                                               success);
       }
     } else {
       if (success) {
@@ -1119,9 +1124,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                                                   si.service_exists_,
                                                   connection_key);
     security_manager::SSLContext* ssl_context =
-        security_manager_->CreateSSLContext(connection_key);
+        GetSSLContextBySession(session_info);
 
-    if (ssl_context && security_manager_->IsCertificateUpdateRequired()) {
+    if (!ssl_context || security_manager_->IsCertificateUpdateRequired()) {
       const std::string error("CreateSSLContext failed");
       LOG4CXX_ERROR(logger_, error);
       security_manager_->SendInternalError(
@@ -1272,7 +1277,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                       PROTECTION_OFF);
   return RESULT_OK;
 }
-
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
     const ProtocolPacket& packet) {
   const ConnectionID connection_id = packet.connection_id();
@@ -1681,8 +1685,13 @@ security_manager::SSLContext* ProtocolHandlerImpl::GetSSLContextBySession(
       session_info.connection_id_, session_info.session_id_);
   session_observer_.SetProtectionFlag(
       connection_key, ServiceTypeFromByte(session_info.service_type_));
-  return session_observer_.GetSSLContext(connection_key,
-                                         protocol_handler::kControl);
+
+  security_manager::SSLContext* ssl_context = session_observer_.GetSSLContext(
+      connection_key, protocol_handler::kControl);
+  if (!ssl_context) {
+    ssl_context = security_manager_->CreateNewSSLContext(connection_key);
+  }
+  return ssl_context;
 }
 
 void ProtocolHandlerImpl::StartEncryptedService(const SessionInfo& si) {

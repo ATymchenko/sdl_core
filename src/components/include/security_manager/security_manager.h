@@ -121,6 +121,7 @@ class SecurityManager : public protocol_handler::ProtocolObserver {
    * @return new \c  SSLContext or \c NULL on any error
    */
   virtual SSLContext* CreateSSLContext(const uint32_t& connection_key) = 0;
+  virtual SSLContext* CreateNewSSLContext(const uint32_t& connection_key) = 0;
 
   /**
    * \brief Start handshake as SSL client
