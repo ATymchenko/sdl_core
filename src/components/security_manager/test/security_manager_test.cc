@@ -399,7 +399,7 @@ TEST_F(SecurityManagerTest, CreateSSLContext_ServiceAlreadyProtected) {
 /*
  * Shall send Internall Error on error create SSL
  */
-TEST_F(SecurityManagerTest, CreateSSLContext_ErrorCreateSSL) {
+TEST_F(SecurityManagerTest, DISABLED_CreateSSLContext_ErrorCreateSSL) {
   SetMockCryptoManager();
   // Expect InternalError with ERROR_ID
   uint32_t connection_id = 0;
@@ -426,7 +426,7 @@ TEST_F(SecurityManagerTest, CreateSSLContext_ErrorCreateSSL) {
  * Shall send InternalError with SERVICE_NOT_FOUND
  * on getting any Error with call SetSSLContext
  */
-TEST_F(SecurityManagerTest, CreateSSLContext_SetSSLContextError) {
+TEST_F(SecurityManagerTest, DISABLED_CreateSSLContext_SetSSLContextError) {
   SetMockCryptoManager();
   // Expect InternalError with ERROR_ID
   uint32_t connection_id = 0;
@@ -458,7 +458,7 @@ TEST_F(SecurityManagerTest, CreateSSLContext_SetSSLContextError) {
 /*
  * Shall protect connection on correct call CreateSSLContext
  */
-TEST_F(SecurityManagerTest, CreateSSLContext_Success) {
+TEST_F(SecurityManagerTest, DISABLED_CreateSSLContext_Success) {
   SetMockCryptoManager();
   // Expect no Errors
   // Expect no notifying listeners - it will be done after handshake
