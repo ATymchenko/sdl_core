@@ -1236,6 +1236,15 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     }
     // Certificate is existing and doesn't rquire update,
     // try to start encrypted service
+    struct SessionObserver::ExistingSessionInfo dump = {0};
+    const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
+    const bool try_start = true;
+    session_observer_.OnSessionStartedCallback(connection_id,
+                                               session_id,
+                                               service_type,
+                                               PROTECTION_ON,
+                                               try_start,
+                                               &dump);
     if (ssl_context->IsInitCompleted()) {
       // mark service as protected
       session_observer_.SetProtectionFlag(connection_key, service_type);
@@ -1277,6 +1286,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                       PROTECTION_OFF);
   return RESULT_OK;
 }
+
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
     const ProtocolPacket& packet) {
   const ConnectionID connection_id = packet.connection_id();
