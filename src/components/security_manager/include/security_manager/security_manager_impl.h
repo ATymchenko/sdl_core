@@ -134,7 +134,6 @@ class SecurityManagerImpl : public SecurityManager,
    * @return new \c  SSLContext or \c NULL on any error
    */
   SSLContext* CreateSSLContext(const uint32_t& connection_key) OVERRIDE;
-  SSLContext* CreateNewSSLContext(const uint32_t& connection_key) OVERRIDE;
 
   /**
    * \brief Start handshake as SSL client
