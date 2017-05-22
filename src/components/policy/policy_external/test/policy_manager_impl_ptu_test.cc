@@ -53,7 +53,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 TEST_F(PolicyManagerImplTest,
-       DISABLED_TiggerPTUForNaviAppInCaseNoCertificateExistsInPolicyTable) {
+       TiggerPTUForNaviAppInCaseNoCertificateExistsInPolicyTable) {
   EXPECT_CALL(*cache_manager_, GetDeviceConsent(_))
       .WillOnce(Return(kDeviceAllowed));
   const uint32_t type = 0;
@@ -73,18 +73,6 @@ TEST_F(PolicyManagerImplTest,
   EXPECT_CALL(*cache_manager_,
               GetGroupsWithSameEntities(external_consent_status))
       .WillOnce(Return(group));
-
-  EXPECT_CALL(*cache_manager_, ResetCalculatedPermissions());
-
-  EXPECT_CALL(*cache_manager_, GetPermissionsForApp(_, _, _))
-      .WillOnce(Return(true))
-      .WillOnce(Return(true));
-  EXPECT_CALL(*cache_manager_, GetFunctionalGroupNames(_))
-      .WillOnce(Return(true))
-      .WillOnce(Return(true));
-
-  EXPECT_CALL(*cache_manager_, SetUserPermissionsForApp(_, _))
-      .WillOnce(Return(false));
 
   EXPECT_CALL(*cache_manager_, SetExternalConsentForApp(_));
 

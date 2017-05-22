@@ -640,9 +640,11 @@ void PolicyHandler::OnAppPermissionConsentInternal(
                  "setting common permissions.");
   }
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  if (!policy_manager_->SetExternalConsentStatus(external_consent_status)) {
-    LOG4CXX_WARN(logger_,
-                 "External User Consent Settings status has not been set!");
+  if (policy_manager_->IsNeedToUpdateExternalConsentStatus(
+          external_consent_status)) {
+    if (!policy_manager_->SetExternalConsentStatus(external_consent_status)) {
+      LOG4CXX_WARN(logger_, "ExternalConsent status has not been set!");
+    }
   }
 #endif
 }
@@ -1567,17 +1569,22 @@ std::string PolicyHandler::GetLockScreenIconUrl() const {
   return policy_manager_->GetLockScreenIconUrl();
 }
 
+void PolicyHandler::ResetRetrySequence() {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->ResetRetrySequence();
+}
+
 uint32_t PolicyHandler::NextRetryTimeout() {
   POLICY_LIB_CHECK(0);
   LOG4CXX_AUTO_TRACE(logger_);
   return policy_manager_->NextRetryTimeout();
 }
 
-uint32_t PolicyHandler::TimeoutExchangeSec() {
+uint32_t PolicyHandler::TimeoutExchangeSec() const {
   return TimeoutExchangeMSec() / date_time::DateTime::MILLISECONDS_IN_SECOND;
 }
 
-uint32_t PolicyHandler::TimeoutExchangeMSec() {
+uint32_t PolicyHandler::TimeoutExchangeMSec() const {
   POLICY_LIB_CHECK(0);
   return policy_manager_->TimeoutExchangeMSec();
 }
