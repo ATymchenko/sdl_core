@@ -52,6 +52,12 @@
 #define TLS1_1_MINIMAL_VERSION 0x1000103fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION 0x00909000L
 
+// Ubuntu 16.04 - 0x1000207fL "OpenSSL 1.0.2g-fips  1 Mar 2016"
+// The SSLv3 context is NULL
+// Ubuntu 14.04 - 0x1000106fL "OpenSSL 1.0.1f 6 Jan 2014"
+// The SSLv3 context is not NULL
+#define SSL3_MAXIMAL_VERSION 0x1000106fL
+
 namespace security_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SecurityManager")
@@ -137,7 +143,14 @@ bool CryptoManagerImpl::Init() {
 #endif
   switch (get_settings().security_manager_protocol_name()) {
     case SSLv3:
+#if OPENSSL_VERSION_NUMBER > SSL3_MAXIMAL_VERSION
+      LOG4CXX_WARN(logger_,
+                   "OpenSSL has no valid SSLv3 context with version higher "
+                   "than 1.0.1, set TLSv1.0");
+      method = is_server ? TLSv1_server_method() : TLSv1_client_method();
+#else
       method = is_server ? SSLv3_server_method() : SSLv3_client_method();
+#endif
       break;
     case TLSv1:
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
